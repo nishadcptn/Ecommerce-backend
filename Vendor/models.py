@@ -14,10 +14,6 @@ class User(AbstractUser):
     class Meta:
         db_table = 'user'
 
-    def __str__(self):
-        """String for representing the MyModelName object (in Admin site etc.)."""
-        return self.first_name+" "+self.last_name
-
 
 class Organization(models.Model):
     uuid = models.UUIDField(
@@ -29,7 +25,7 @@ class Organization(models.Model):
     pin = models.IntegerField()
     phone = models.CharField(max_length=10)
     email = models.EmailField(max_length=254)
-    logo = models.ImageField(upload_to="Company/")
+    logo = models.TextField()
 
     class Meta:
         db_table = 'organization'
@@ -46,7 +42,6 @@ class OrganizationMember(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,)
     user_type = models.CharField(max_length=220)
-    type = models.CharField(max_length=220)
 
     class Meta:
         db_table = 'organizationMember'

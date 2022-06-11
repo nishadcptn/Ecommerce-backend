@@ -15,3 +15,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Organization
         fields = '__all__'
+
+
+class OrgMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrganizationMember
+        fields = '__all__'
