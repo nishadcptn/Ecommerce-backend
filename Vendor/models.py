@@ -20,7 +20,7 @@ class Organization(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=220)
     type = models.CharField(max_length=220)
-    user_count = models.IntegerField()
+    user_count = models.IntegerField()  # if needed
     address = models.TextField()
     pin = models.IntegerField()
     phone = models.CharField(max_length=10)
@@ -40,19 +40,36 @@ class OrganizationMember(models.Model):
     organization = models.ForeignKey(Organization,
                                      on_delete=models.CASCADE,)
     user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,)
+                             on_delete=models.CASCADE, related_name='user')
     user_type = models.CharField(max_length=220)
+    added_by = models.ForeignKey(User,
+                                 on_delete=models.CASCADE, related_name='added_by', null=True)
 
     class Meta:
         db_table = 'organizationMember'
 
+
+class MasterCatagory(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=50)
+    description = models.TextField(null=True, default=None, blank=True)
+    status = models.BooleanField(default=True)
+    image = models.ImageField(upload_to="catagory/",
+                              null=True, default=None, blank=True)
+
+    class Meta:
+        db_table = "master_catagory"
+
     def __str__(self):
-        return self.user
+        return self.name
 
 
 class Catagory(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)
+    master_catagory = models.ForeignKey(
+        MasterCatagory, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, default=None, blank=True)
     status = models.BooleanField(default=True)
