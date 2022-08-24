@@ -42,3 +42,9 @@ class OrgMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.OrganizationMember
         fields = '__all__'
+
+
+class AddOrgMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrganizationMember
+        fields = ('organization', 'email', 'added_by')

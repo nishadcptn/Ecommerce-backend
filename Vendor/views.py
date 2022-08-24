@@ -1,3 +1,7 @@
+from cmath import exp
+import json
+from lib2to3.pgen2 import token
+from pickle import TRUE
 import re
 from django.shortcuts import render
 from rest_framework.views import APIView
@@ -5,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import *
 from django.contrib.auth.hashers import make_password, check_password
 from Vendor.serializer import *
-from datetime import date
+from datetime import date, datetime, timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from Vendor.models import *
@@ -14,7 +18,10 @@ import os
 import time
 from django.core.files.storage import default_storage
 import environ
-
+import string
+import random
+from django.contrib.auth.decorators import user_passes_test
+from jose import jwt
 env = environ.Env()
 environ.Env.read_env()
 
@@ -36,10 +43,12 @@ storage = firebase.storage()
 def generateToken(username):
     user = User.objects.get(username=username)
     refresh = RefreshToken.for_user(user)
+    access_token = refresh.access_token
+    access_token.set_exp(lifetime=timedelta(days=10))
 
     return {
         'refresh': str(refresh),
-        'access': str(refresh.access_token),
+        'access': str(access_token),
     }
 
 
@@ -83,3 +92,38 @@ class OrganizationAPI(APIView):
                 return Response({'msg': False, "error": _serializer.errors})
         else:
             return Response({'msg': False, "error": "image upload filed"})
+
+
+class AddOrganizationMember(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, req):
+        email = req.data.get('email')
+        org = req.data.get('organization')
+        is_exists = OrganizationMember.objects.filter(
+            email=email, organization=org)
+        if is_exists:
+            expiry = datetime.now() + timedelta(hours=1)
+            _member = {
+                'email': email,
+                'added_by': req.user.id,
+                'organization': org,
+                'expiry': str(expiry)
+            }
+            token = jwt.encode(_member, env('JWT_SECRET'), algorithm='HS256')
+            "SEND EMAIL WITH TOKENN"
+            return Response({'success': True})
+        _member = {
+            'email': email,
+            'added_by': req.user.id,
+            'organization': org
+        }
+        _serializer = AddOrgMemberSerializer(data=_member)
+        if _serializer.is_valid():
+            _serializer.save()
+            expiry = datetime.now() + timedelta(hours=1)
+            _member['expiry'] = str(expiry)
+            token = jwt.encode(_member, env('JWT_SECRET'), algorithm='HS256')
+            "SEND EMAIL WITH TOKENN"
+            return Response({'success': True})
+        return Response({'success': False, 'error': _serializer.errors})

@@ -40,8 +40,9 @@ class OrganizationMember(models.Model):
     organization = models.ForeignKey(Organization,
                                      on_delete=models.CASCADE,)
     user = models.ForeignKey(User,
-                             on_delete=models.CASCADE, related_name='user')
-    user_type = models.CharField(max_length=220)
+                             on_delete=models.CASCADE, related_name='user', null=True)
+    email = models.EmailField(
+        max_length=254, null=True, blank=True, default=None)
     added_by = models.ForeignKey(User,
                                  on_delete=models.CASCADE, related_name='added_by', null=True)
 
@@ -178,18 +179,6 @@ class Address(models.Model):
         db_table = "address"
 
 
-class Highlight(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False)
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    category = models.ForeignKey(Catagory, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_created=True)
-
-    class Meta:
-        db_table = "highlight"
-
-
 class Cart(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)
@@ -212,23 +201,12 @@ class Whishlist(models.Model):
         db_table = "whishlist"
 
 
-class Card(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False)
-    card_no = models.CharField(max_length=16)
-    card_name = models.CharField(max_length=100)
-
-    class Meta:
-        db_table = "card"
-
-
 class Payment(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)
     username = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=100)
     created = models.DateTimeField(auto_created=True)
-    card = models.ForeignKey(Card, on_delete=models.CASCADE)
     txn_id = models.CharField(max_length=220, unique=True)
     amount = models.FloatField()
 
